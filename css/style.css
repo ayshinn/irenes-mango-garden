@@ -506,6 +506,38 @@ html, body {
 .ing-name   { flex: 1; }
 .ing-qty    { width: 32px; text-align: right; color: var(--gray); }
 
+/* ── Upgrades extras ── */
+.upgrade-tree {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.upgrade-category-title {
+  font-size: 9px;
+  color: var(--cream);
+  text-shadow: 1px 1px 0 var(--dark);
+  margin-bottom: 8px;
+}
+
+.upgrade-card.purchased {
+  background: #d4edda;
+  border-color: var(--green-dk);
+  opacity: 0.85;
+}
+
+.upgrade-card.locked {
+  background: #e0e0e0;
+  opacity: 0.65;
+}
+
+.upg-status { color: var(--green-dk); font-size: 8px; margin-top: 6px; }
+.upg-cost   { color: var(--mango-dk); font-size: 8px; margin-top: 6px; }
+.upg-req    { color: var(--gray);     font-size: 7px; margin-top: 4px; line-height: 1.6; }
+
+.btn-locked { opacity: 0.5; }
+
 /* ── Market extras ── */
 .inventory-card.event-product {
   border-color: var(--coin);

@@ -1,8 +1,9 @@
 import { state } from './main.js';
-import { TREE_TIERS, PRODUCTS, INGREDIENTS } from './data.js';
+import { TREE_TIERS, PRODUCTS, INGREDIENTS, UPGRADES } from './data.js';
 import { plantPlot, waterPlot, harvestPlot } from './farm.js';
 import { queueRecipe, buyIngredient } from './recipes.js';
 import { sellProduct, sellAll, sellRawMangos, getEffectivePrice, getRawMangoPrice } from './market.js';
+import { purchaseUpgrade, isPurchased, isAvailable } from './upgrades.js';
 
 const TIER_EMOJI = ['🌱', '🌿', '🌳', '🌲'];
 
@@ -12,6 +13,7 @@ export function initUI() {
   _setupFarmEvents();
   _setupKitchenEvents();
   _setupMarketEvents();
+  _setupUpgradeEvents();
 }
 
 function _setupTabs() {
@@ -236,16 +238,29 @@ function _setupMarketEvents() {
     const mode      = btn.dataset.mode;   // 'one' | 'all' | 'raw-one' | 'raw-all'
 
     let result;
-    if (mode === 'raw-one') result = sellRawMangos(1);
-    else if (mode === 'raw-all') result = sellRawMangos(state.inventory.mango ?? 0);
-    else if (mode === 'all')     result = sellAll(productId);
-    else                         result = sellProduct(productId, 1);
+    if (mode === 'raw-one')              result = sellRawMangos(1);
+    else if (mode === 'raw-all')         result = sellRawMangos(state.inventory.mango ?? 0);
+    else if (productId === 'golden_mango') result = _sellGoldenMango(mode === 'all'
+        ? (state.inventory.golden_mango ?? 0) : 1);
+    else if (mode === 'all')             result = sellAll(productId);
+    else                                 result = sellProduct(productId, 1);
 
     if (result.ok && result.coins > 0) {
       updateCoinDisplay();
       showCoinToast(`+${result.coins}g`, btn);
     }
   });
+}
+
+function _sellGoldenMango(qty) {
+  const have   = state.inventory.golden_mango ?? 0;
+  const actual = Math.min(qty, have);
+  if (actual <= 0) return { ok: false, coins: 0, qty: 0 };
+  const earned = 1000 * actual;
+  state.inventory.golden_mango  = have - actual;
+  state.coins                  += earned;
+  state.stats.coinsEarned      += earned;
+  return { ok: true, coins: earned, qty: actual };
 }
 
 export function renderMarket() {
@@ -305,12 +320,117 @@ function _renderInventoryGrid() {
     </div>`;
   }
 
+  // Golden mango (secret unlock)
+  if (state.goldenMangoUnlocked) {
+    const gQty = state.inventory.golden_mango ?? 0;
+    html += `<div class="inventory-card event-product">
+      <div class="item-name">✨ Golden Mango</div>
+      <div class="item-qty">In stock: ${gQty}</div>
+      <div class="item-price">🪙 1000g</div>
+      <div class="sell-btns">
+        <button class="btn btn-small" data-sell="golden_mango" data-mode="one" ${gQty === 0 ? 'disabled' : ''}>Sell 1</button>
+        <button class="btn btn-small btn-green" data-sell="golden_mango" data-mode="all" ${gQty === 0 ? 'disabled' : ''}>Sell All</button>
+      </div>
+    </div>`;
+  }
+
   grid.innerHTML = html;
 }
 
-// ── Stubs (filled in later steps) ───────────────────────────
-export function renderUpgrades() {}
-export function renderStats()    {}
+// ── Upgrades ────────────────────────────────────────────────
+const CATEGORY_META = {
+  farm:    { label: '🌳 Farm',         order: 0 },
+  water:   { label: '💧 Water',        order: 1 },
+  kitchen: { label: '🍴 Kitchen',      order: 2 },
+  market:  { label: '🏪 Market',       order: 3 },
+  decor:   { label: '🌸 Garden Decor', order: 4 },
+};
+
+function _setupUpgradeEvents() {
+  document.getElementById('tab-upgrades').addEventListener('click', e => {
+    const btn = e.target.closest('.upg-buy-btn');
+    if (!btn || btn.disabled) return;
+    const id = btn.dataset.upg;
+    const result = purchaseUpgrade(id);
+    if (result.ok) {
+      updateCoinDisplay();
+      _showSparkle(btn);
+    } else {
+      showToast(result.msg, 'error');
+    }
+  });
+}
+
+export function renderUpgrades() {
+  const tree = document.getElementById('upgrade-tree');
+
+  // Group by category
+  const byCategory = {};
+  for (const u of UPGRADES) {
+    if (!byCategory[u.category]) byCategory[u.category] = [];
+    byCategory[u.category].push(u);
+  }
+
+  const categories = Object.keys(CATEGORY_META).sort(
+    (a, b) => CATEGORY_META[a].order - CATEGORY_META[b].order
+  );
+
+  tree.innerHTML = categories.map(cat => {
+    const upgrades = byCategory[cat] ?? [];
+    const meta     = CATEGORY_META[cat];
+
+    const cards = upgrades.map(u => {
+      const purchased = isPurchased(u.id);
+      const available = isAvailable(u.id);
+      const canAfford = state.coins >= u.cost;
+
+      let cls = 'upgrade-card';
+      if (purchased) cls += ' purchased';
+      else if (!available) cls += ' locked';
+
+      let footer = '';
+      if (purchased) {
+        footer = '<div class="upg-status">✓ Purchased</div>';
+      } else if (available) {
+        const btnCls = canAfford ? '' : ' btn-locked';
+        footer = `<div class="upg-cost">🪙 ${u.cost.toLocaleString()}g</div>
+          <button class="btn btn-small upg-buy-btn${btnCls}" data-upg="${u.id}" ${canAfford ? '' : 'disabled'}>Buy</button>`;
+      } else {
+        const req = UPGRADES.find(x => x.id === u.requires);
+        footer = `<div class="upg-cost">🪙 ${u.cost.toLocaleString()}g</div>
+          <div class="upg-req">🔒 Requires: ${req?.name ?? u.requires}</div>`;
+      }
+
+      return `<div class="${cls}" data-id="${u.id}">
+        <div class="upgrade-name">${u.name}</div>
+        <div class="upgrade-desc">${u.desc}</div>
+        ${footer}
+      </div>`;
+    }).join('');
+
+    return `<div class="upgrade-category">
+      <div class="upgrade-category-title">${meta.label}</div>
+      ${cards}
+    </div>`;
+  }).join('');
+}
+
+function _showSparkle(anchorEl) {
+  const rect = anchorEl.getBoundingClientRect();
+  for (let i = 0; i < 7; i++) {
+    const el = document.createElement('div');
+    el.className   = 'sparkle';
+    el.textContent = '✨';
+    el.style.left  = (rect.left + Math.random() * rect.width)  + 'px';
+    el.style.top   = (rect.top  + window.scrollY + Math.random() * rect.height) + 'px';
+    el.style.animationDelay = (Math.random() * 0.25) + 's';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1100);
+  }
+}
+
+// ── Stub (step 6) ────────────────────────────────────────────
+export function renderStats() {}
 
 // ── Shared utils ────────────────────────────────────────────
 export function updateCoinDisplay() {

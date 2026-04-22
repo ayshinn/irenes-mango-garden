@@ -54,6 +54,21 @@ function _tryQueue(recipeId) {
     return { ok: false, msg: `Need ${product.mangos} 🥭` };
   }
 
+  // Auto-buy missing paid ingredients if upgrade purchased
+  if (state.autoBuy) {
+    for (const [ingId, qty] of Object.entries(product.ingredients)) {
+      if (INGREDIENTS[ingId].price === 0) continue;
+      const need = qty - (state.ingredients[ingId] ?? 0);
+      if (need > 0) {
+        const cost = INGREDIENTS[ingId].price * need;
+        if (state.coins >= cost) {
+          state.coins -= cost;
+          state.ingredients[ingId] = (state.ingredients[ingId] ?? 0) + need;
+        }
+      }
+    }
+  }
+
   for (const [ingId, qty] of Object.entries(product.ingredients)) {
     if (INGREDIENTS[ingId].price === 0) continue; // free (water)
     if ((state.ingredients[ingId] ?? 0) < qty) {

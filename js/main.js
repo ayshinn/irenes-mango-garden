@@ -3,7 +3,8 @@ import { DEFAULT_STATE } from './data.js';
 import { initFarm, tickFarm } from './farm.js';
 import { initKitchen, tickKitchen } from './recipes.js';
 import { initMarket, tickMarket } from './market.js';
-import { initUI, renderFarm, renderKitchen, renderMarket, updateCoinDisplay, showToast } from './ui.js';
+import { initUpgrades } from './upgrades.js';
+import { initUI, renderFarm, renderKitchen, renderMarket, renderUpgrades, updateCoinDisplay, showToast } from './ui.js';
 
 export let state = {};
 
@@ -21,6 +22,7 @@ function init() {
   initFarm();
   initKitchen();
   initMarket();
+  initUpgrades();
 
   _applyOfflineProgress();
   initUI();
@@ -29,6 +31,7 @@ function init() {
   renderFarm();
   renderKitchen();
   renderMarket();
+  renderUpgrades();
 
   lastTs = performance.now();
   requestAnimationFrame(loop);
@@ -53,9 +56,10 @@ function loop(ts) {
 
   if (ts - lastRender > RENDER_INTERVAL) {
     const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
-    if (activeTab === 'farm')    renderFarm();
-    if (activeTab === 'kitchen') renderKitchen();
-    if (activeTab === 'market')  renderMarket();
+    if (activeTab === 'farm')     renderFarm();
+    if (activeTab === 'kitchen')  renderKitchen();
+    if (activeTab === 'market')   renderMarket();
+    if (activeTab === 'upgrades') renderUpgrades();
     updateCoinDisplay();
     lastRender = ts;
   }
