@@ -1,0 +1,479 @@
+/* ── Palette ── */
+:root {
+  --mango:   #FF9900;
+  --mango-dk:#CC7A00;
+  --green:   #4CAF50;
+  --green-dk:#388E3C;
+  --sky:     #87CEEB;
+  --cream:   #FFF8E7;
+  --brown:   #8B5E3C;
+  --dark:    #2C1810;
+  --coin:    #FFD700;
+  --red:     #E53935;
+  --gray:    #9E9E9E;
+
+  --px: 4px;           /* pixel unit */
+  --font: 'Press Start 2P', monospace;
+}
+
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background-color: var(--green-dk);
+  background-image:
+    repeating-linear-gradient(0deg,   transparent, transparent 15px, rgba(0,0,0,0.08) 15px, rgba(0,0,0,0.08) 16px),
+    repeating-linear-gradient(90deg,  transparent, transparent 15px, rgba(0,0,0,0.08) 15px, rgba(0,0,0,0.08) 16px);
+  color: var(--dark);
+  font-family: var(--font);
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+/* ── Pixel Border Mixin (box-shadow staircase) ── */
+.pixel-border {
+  border: var(--px) solid var(--dark);
+  box-shadow:
+    calc(var(--px) * -1) 0 0 var(--dark),
+    var(--px) 0 0 var(--dark),
+    0 calc(var(--px) * -1) 0 var(--dark),
+    0 var(--px) 0 var(--dark),
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 rgba(0,0,0,0.25),
+    inset var(--px) var(--px) 0 rgba(255,255,255,0.3);
+}
+
+/* ── Top Bar ── */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--mango);
+  border-bottom: var(--px) solid var(--dark);
+  padding: 8px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 var(--px) 0 var(--mango-dk);
+}
+
+.game-title {
+  font-size: 11px;
+  color: var(--dark);
+  text-shadow: 2px 2px 0 rgba(255,255,255,0.4);
+}
+
+.coin-display {
+  font-size: 12px;
+  color: var(--dark);
+  background: var(--coin);
+  padding: 4px 10px;
+  border: var(--px) solid var(--dark);
+  box-shadow: var(--px) var(--px) 0 var(--dark);
+}
+
+/* ── Tab Nav ── */
+.tab-nav {
+  display: flex;
+  background: var(--brown);
+  border-bottom: var(--px) solid var(--dark);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tab-nav::-webkit-scrollbar { display: none; }
+
+.tab-btn {
+  font-family: var(--font);
+  font-size: 9px;
+  padding: 10px 14px;
+  background: var(--brown);
+  color: var(--cream);
+  border: none;
+  border-right: 2px solid var(--dark);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.1s;
+}
+
+.tab-btn:hover { background: var(--mango-dk); color: var(--dark); }
+
+.tab-btn.active {
+  background: var(--cream);
+  color: var(--dark);
+  border-bottom: var(--px) solid var(--cream);
+  margin-bottom: calc(var(--px) * -1);
+}
+
+/* ── Tab Content ── */
+.tab-content { padding: 16px; max-width: 900px; margin: 0 auto; }
+
+.tab-panel { display: none; animation: fadeIn 0.15s ease; }
+.tab-panel.active { display: block; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.tab-panel h2 {
+  font-size: 13px;
+  color: var(--cream);
+  text-shadow: 2px 2px 0 var(--dark);
+  margin-bottom: 16px;
+}
+
+/* ── Panel Cards ── */
+.panel-card {
+  background: var(--cream);
+  border: var(--px) solid var(--dark);
+  box-shadow: var(--px) var(--px) 0 var(--dark);
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+/* ── Buttons ── */
+.btn {
+  font-family: var(--font);
+  font-size: 9px;
+  padding: 8px 14px;
+  border: var(--px) solid var(--dark);
+  box-shadow: var(--px) var(--px) 0 var(--dark);
+  cursor: pointer;
+  background: var(--mango);
+  color: var(--dark);
+  transition: transform 0.05s, box-shadow 0.05s;
+  image-rendering: pixelated;
+}
+
+.btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: calc(var(--px) + 1px) calc(var(--px) + 1px) 0 var(--dark);
+}
+
+.btn:active {
+  transform: translate(var(--px), var(--px));
+  box-shadow: none;
+}
+
+.btn:disabled {
+  background: var(--gray);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: var(--px) var(--px) 0 var(--dark);
+  opacity: 0.6;
+}
+
+.btn-green { background: var(--green); color: #fff; }
+.btn-danger { background: var(--red);  color: #fff; margin-top: 16px; }
+.btn-small { font-size: 8px; padding: 5px 8px; }
+
+/* ── Farm Grid ── */
+.farm-grid {
+  display: inline-grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.plot {
+  width: 80px;
+  height: 80px;
+  background: var(--brown);
+  border: var(--px) solid var(--dark);
+  box-shadow: var(--px) var(--px) 0 var(--dark);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: transform 0.05s;
+}
+
+.plot:hover { transform: translate(-1px, -1px); }
+.plot:active { transform: translate(1px, 1px); }
+
+.plot-emoji { font-size: 28px; line-height: 1; }
+
+.plot-label {
+  font-size: 6px;
+  color: var(--cream);
+  text-align: center;
+  margin-top: 4px;
+}
+
+.plot-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background: var(--green);
+  transition: width 0.5s linear;
+}
+
+.plot-progress.watered { background: var(--sky); }
+
+.plot.ready { animation: plotPulse 1s ease-in-out infinite; }
+
+@keyframes plotPulse {
+  0%, 100% { box-shadow: var(--px) var(--px) 0 var(--dark); }
+  50%       { box-shadow: var(--px) var(--px) 0 var(--mango), 0 0 12px var(--mango); }
+}
+
+.plot.withered { filter: grayscale(0.6) brightness(0.8); }
+
+/* ── Water Can Bar ── */
+.water-can-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--cream);
+  border: var(--px) solid var(--dark);
+  box-shadow: var(--px) var(--px) 0 var(--dark);
+  padding: 8px 12px;
+  margin-top: 8px;
+  font-size: 9px;
+}
+
+.water-refill-bar {
+  flex: 1;
+  height: 8px;
+  background: #ddd;
+  border: 2px solid var(--dark);
+}
+
+.water-refill-fill {
+  height: 100%;
+  background: var(--sky);
+  width: 0%;
+  transition: width 1s linear;
+}
+
+/* ── Kitchen ── */
+.craft-queue {
+  background: var(--cream);
+  border: var(--px) solid var(--dark);
+  box-shadow: var(--px) var(--px) 0 var(--dark);
+  padding: 10px;
+  min-height: 50px;
+  margin-bottom: 12px;
+  font-size: 9px;
+}
+
+.craft-slot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+}
+
+.craft-bar {
+  flex: 1;
+  height: 10px;
+  background: #ddd;
+  border: 2px solid var(--dark);
+  overflow: hidden;
+}
+
+.craft-bar-fill {
+  height: 100%;
+  background: var(--mango);
+  width: 0%;
+  transition: width 0.5s linear;
+}
+
+.recipe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.recipe-card {
+  background: var(--cream);
+  border: var(--px) solid var(--dark);
+  box-shadow: var(--px) var(--px) 0 var(--dark);
+  padding: 10px;
+  cursor: pointer;
+  transition: transform 0.05s;
+  font-size: 8px;
+}
+
+.recipe-card:hover { transform: translate(-1px, -1px); }
+.recipe-card:active { transform: translate(1px, 1px); box-shadow: none; }
+.recipe-card.locked { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
+
+.recipe-name { font-size: 9px; margin-bottom: 6px; }
+.recipe-sell  { color: var(--mango-dk); font-size: 8px; }
+
+/* ── Market ── */
+.market-event-banner {
+  background: var(--mango);
+  border: var(--px) solid var(--dark);
+  box-shadow: var(--px) var(--px) 0 var(--dark);
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  font-size: 9px;
+  text-align: center;
+  animation: bannerPulse 0.8s ease-in-out infinite;
+}
+
+@keyframes bannerPulse {
+  0%, 100% { background: var(--mango); }
+  50%       { background: var(--coin); }
+}
+
+.market-event-banner.hidden { display: none; }
+
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.inventory-card {
+  background: var(--cream);
+  border: var(--px) solid var(--dark);
+  box-shadow: var(--px) var(--px) 0 var(--dark);
+  padding: 10px;
+  font-size: 8px;
+}
+
+.inventory-card .item-name { font-size: 9px; margin-bottom: 6px; }
+.inventory-card .item-qty  { color: var(--gray); margin-bottom: 6px; }
+.inventory-card .item-price {
+  color: var(--mango-dk);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.price-arrow-up   { color: var(--green); }
+.price-arrow-down { color: var(--red); }
+
+.sell-btns { display: flex; gap: 6px; }
+
+/* ── Upgrades ── */
+.upgrade-tree {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.upgrade-category { margin-bottom: 8px; }
+
+.upgrade-category-title {
+  font-size: 9px;
+  color: var(--cream);
+  text-shadow: 1px 1px 0 var(--dark);
+  margin-bottom: 8px;
+}
+
+.upgrade-card {
+  background: var(--cream);
+  border: var(--px) solid var(--dark);
+  box-shadow: var(--px) var(--px) 0 var(--dark);
+  padding: 10px;
+  font-size: 8px;
+  margin-bottom: 8px;
+}
+
+.upgrade-card.locked {
+  background: #ddd;
+  opacity: 0.7;
+}
+
+.upgrade-card.purchased {
+  background: #d4edda;
+  border-color: var(--green-dk);
+}
+
+.upgrade-name { font-size: 9px; margin-bottom: 4px; }
+.upgrade-desc { color: #555; margin-bottom: 8px; line-height: 1.8; }
+.upgrade-cost { color: var(--mango-dk); }
+
+/* ── Stats ── */
+.stats-panel {
+  background: var(--cream);
+  border: var(--px) solid var(--dark);
+  box-shadow: var(--px) var(--px) 0 var(--dark);
+  padding: 16px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 2px solid #eee;
+  font-size: 9px;
+}
+
+.stat-row:last-child { border-bottom: none; }
+
+.milestones { margin-top: 16px; }
+.milestone {
+  font-size: 8px;
+  color: var(--mango-dk);
+  padding: 4px 0;
+}
+
+/* ── Toasts ── */
+.toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  background: var(--dark);
+  color: var(--cream);
+  font-family: var(--font);
+  font-size: 9px;
+  padding: 8px 14px;
+  border: var(--px) solid var(--mango);
+  box-shadow: var(--px) var(--px) 0 var(--mango);
+  animation: toastIn 0.2s ease, toastOut 0.3s ease 2.5s forwards;
+}
+
+.toast.coin-toast {
+  color: var(--coin);
+  border-color: var(--coin);
+  box-shadow: var(--px) var(--px) 0 var(--coin);
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes toastOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-10px); }
+}
+
+/* ── Sparkle (upgrade unlock) ── */
+.sparkle {
+  position: fixed;
+  pointer-events: none;
+  font-size: 20px;
+  animation: sparkleFloat 0.8s ease forwards;
+  z-index: 998;
+}
+
+@keyframes sparkleFloat {
+  0%   { opacity: 1; transform: scale(1)   translateY(0); }
+  100% { opacity: 0; transform: scale(1.6) translateY(-40px); }
+}
+
+/* ── Mobile ── */
+@media (max-width: 600px) {
+  .game-title { font-size: 8px; }
+  .tab-btn { font-size: 7px; padding: 8px 10px; }
+  .tab-content { padding: 10px; }
+  .plot { width: 64px; height: 64px; }
+  .recipe-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+  .inventory-grid { grid-template-columns: 1fr 1fr; }
+  .upgrade-tree { grid-template-columns: 1fr; }
+}

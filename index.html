@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Irene's Mango Garden 🥭</title>
+  <link rel="stylesheet" href="css/pixel-font.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <span class="game-title">🥭 Irene's Mango Garden</span>
+    <span class="coin-display">🪙 <span id="coin-amount">0</span></span>
+  </header>
+
+  <nav class="tab-nav">
+    <button class="tab-btn active" data-tab="farm">🌳 Farm</button>
+    <button class="tab-btn" data-tab="kitchen">🍴 Kitchen</button>
+    <button class="tab-btn" data-tab="market">🏪 Market</button>
+    <button class="tab-btn" data-tab="upgrades">⬆️ Upgrades</button>
+    <button class="tab-btn" data-tab="stats">📊 Stats</button>
+  </nav>
+
+  <main class="tab-content">
+    <section id="tab-farm" class="tab-panel active">
+      <h2>Farm</h2>
+      <div id="farm-grid" class="farm-grid"></div>
+      <div class="water-can-bar">
+        <span>💧 Water Can: <span id="water-charges">3</span> / <span id="water-max">3</span></span>
+        <div class="water-refill-bar"><div id="water-refill-fill" class="water-refill-fill"></div></div>
+      </div>
+    </section>
+
+    <section id="tab-kitchen" class="tab-panel">
+      <h2>Kitchen</h2>
+      <div id="craft-queue" class="craft-queue"></div>
+      <div id="recipe-grid" class="recipe-grid"></div>
+    </section>
+
+    <section id="tab-market" class="tab-panel">
+      <h2>Market</h2>
+      <div id="market-event-banner" class="market-event-banner hidden"></div>
+      <div id="inventory-grid" class="inventory-grid"></div>
+    </section>
+
+    <section id="tab-upgrades" class="tab-panel">
+      <h2>Upgrades</h2>
+      <div id="upgrade-tree" class="upgrade-tree"></div>
+    </section>
+
+    <section id="tab-stats" class="tab-panel">
+      <h2>Stats</h2>
+      <div id="stats-panel" class="stats-panel"></div>
+      <button id="new-game-btn" class="btn btn-danger">New Game</button>
+    </section>
+  </main>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
