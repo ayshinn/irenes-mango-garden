@@ -1,9 +1,9 @@
 // ── Tree Tiers ──────────────────────────────────────────────
 export const TREE_TIERS = [
-  { id: 1, name: 'Seedling',    growTime: 30, yieldMin: 1, yieldMax: 2, unlockCost: 0 },
-  { id: 2, name: 'Young Tree',  growTime: 25, yieldMin: 2, yieldMax: 3, unlockCost: 500 },
-  { id: 3, name: 'Mature Tree', growTime: 20, yieldMin: 3, yieldMax: 5, unlockCost: 2000 },
-  { id: 4, name: 'Ancient Tree',growTime: 15, yieldMin: 5, yieldMax: 8, unlockCost: 8000 },
+  { id: 1, name: 'Seedling',    growTime: 30, yieldMin: 1, yieldMax: 2, unlockCost: 0,    seedCost: 5   },
+  { id: 2, name: 'Young Tree',  growTime: 25, yieldMin: 2, yieldMax: 3, unlockCost: 500,  seedCost: 20  },
+  { id: 3, name: 'Mature Tree', growTime: 20, yieldMin: 3, yieldMax: 5, unlockCost: 2000, seedCost: 60  },
+  { id: 4, name: 'Ancient Tree',growTime: 15, yieldMin: 5, yieldMax: 8, unlockCost: 8000, seedCost: 200 },
 ];
 
 // ── Ingredients ─────────────────────────────────────────────
@@ -423,7 +423,7 @@ export const MARKET = {
 
 // ── Save Defaults ────────────────────────────────────────────
 export const DEFAULT_STATE = {
-  coins: 0,
+  coins: 50,
   plots: [
     { state: 'empty', tier: 1, progress: 0, watered: false },
     { state: 'empty', tier: 1, progress: 0, watered: false },

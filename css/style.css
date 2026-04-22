@@ -467,6 +467,76 @@ html, body {
   100% { opacity: 0; transform: scale(1.6) translateY(-40px); }
 }
 
+/* ── Tier Selector ── */
+.tier-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  background: var(--cream);
+  border: var(--px) solid var(--dark);
+  box-shadow: var(--px) var(--px) 0 var(--dark);
+  padding: 8px 12px;
+}
+
+.tier-label { font-size: 9px; }
+
+.tier-btn.active { background: var(--green); color: #fff; }
+
+/* ── Recipe extras ── */
+.recipe-ings  { color: #666; font-size: 7px; margin-bottom: 4px; line-height: 1.8; }
+.recipe-time  { color: #888; font-size: 7px; margin-bottom: 4px; }
+
+.recipe-card.craftable {
+  border-color: var(--green-dk);
+  box-shadow: var(--px) var(--px) 0 var(--green-dk);
+}
+
+/* ── Craft queue extras ── */
+.craft-name { flex: 1; font-size: 8px; }
+.craft-time { font-size: 8px; white-space: nowrap; }
+.queue-empty { font-size: 9px; color: var(--gray); }
+
+/* ── Ingredient shop ── */
+.ingredient-shop { margin-top: 16px; }
+.shop-title { font-size: 10px; margin-bottom: 10px; }
+.ing-grid   { display: flex; flex-direction: column; gap: 6px; }
+.ing-row    { display: flex; align-items: center; gap: 8px; font-size: 8px; }
+.ing-name   { flex: 1; }
+.ing-qty    { width: 32px; text-align: right; color: var(--gray); }
+
+/* ── Market extras ── */
+.inventory-card.event-product {
+  border-color: var(--coin);
+  box-shadow: var(--px) var(--px) 0 var(--mango-dk);
+  animation: eventGlow 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes eventGlow {
+  from { background: var(--cream); }
+  to   { background: #fff9e0; }
+}
+
+/* ── Floating coin toast ── */
+.coin-float {
+  position: absolute;
+  pointer-events: none;
+  font-family: var(--font);
+  font-size: 11px;
+  color: var(--coin);
+  text-shadow: 1px 1px 0 var(--dark);
+  z-index: 999;
+  animation: coinFloat 0.9s ease-out forwards;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+@keyframes coinFloat {
+  0%   { opacity: 1; transform: translateX(-50%) translateY(0);     }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-48px); }
+}
+
 /* ── Mobile ── */
 @media (max-width: 600px) {
   .game-title { font-size: 8px; }
