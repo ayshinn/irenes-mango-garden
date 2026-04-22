@@ -87,10 +87,14 @@ export function harvestPlot(index) {
   let amount = tier.yieldMin + Math.floor(Math.random() * (tier.yieldMax - tier.yieldMin + 1));
   if (wasWithered) amount = Math.max(1, Math.floor(amount / 2));
 
-  state.inventory.mango         = (state.inventory.mango ?? 0) + amount;
-  state.stats.mangosHarvested  += amount;
-  if (state.stats.mangosHarvested >= 500 && !state.goldenMangoUnlocked) {
-    state.goldenMangoUnlocked = true;
+  const prevMilestone = Math.floor(((state.stats.mangosHarvested ?? 0)) / 500);
+  state.inventory.mango        = (state.inventory.mango ?? 0) + amount;
+  state.stats.mangosHarvested += amount;
+  const newMilestone = Math.floor(state.stats.mangosHarvested / 500);
+  if (newMilestone > prevMilestone) {
+    const bonus = newMilestone - prevMilestone;
+    state.inventory.golden_mango = (state.inventory.golden_mango ?? 0) + bonus;
+    state.goldenMangoUnlocked    = true;
   }
 
   plot.state    = 'empty';

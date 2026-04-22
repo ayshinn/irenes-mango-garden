@@ -569,13 +569,81 @@ html, body {
   100% { opacity: 0; transform: translateX(-50%) translateY(-48px); }
 }
 
+/* ── Stats extras ── */
+.stats-section {
+  background: var(--cream);
+  border: var(--px) solid var(--dark);
+  box-shadow: var(--px) var(--px) 0 var(--dark);
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+.stats-subhead {
+  font-size: 9px;
+  color: var(--mango-dk);
+  margin-bottom: 8px;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 4px;
+}
+
+.milestones { display: flex; flex-direction: column; gap: 5px; }
+
+.milestone {
+  font-size: 8px;
+  color: var(--dark);
+  padding: 3px 0;
+}
+
+.locked-milestone {
+  color: var(--gray);
+  opacity: 0.6;
+}
+
+/* ── Cosmetic decorations ── */
+#tab-farm.has-flowers .farm-grid { position: relative; }
+#tab-farm.has-flowers .farm-grid::before {
+  content: '🌸  🌷  🌸  🌷  🌸';
+  display: block;
+  font-size: 16px;
+  text-align: center;
+  margin-bottom: 8px;
+  grid-column: 1 / -1;
+  letter-spacing: 4px;
+}
+
+#tab-farm.has-fountain::after {
+  content: '⛲';
+  display: block;
+  font-size: 36px;
+  text-align: center;
+  margin-top: 12px;
+}
+
+#tab-farm.has-path { background-image:
+  repeating-linear-gradient(45deg, rgba(139,94,60,0.08) 0px, rgba(139,94,60,0.08) 2px, transparent 2px, transparent 12px); }
+
+#tab-farm.has-signs .plot-label { text-decoration: underline; }
+
 /* ── Mobile ── */
 @media (max-width: 600px) {
-  .game-title { font-size: 8px; }
-  .tab-btn { font-size: 7px; padding: 8px 10px; }
-  .tab-content { padding: 10px; }
-  .plot { width: 64px; height: 64px; }
-  .recipe-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
-  .inventory-grid { grid-template-columns: 1fr 1fr; }
-  .upgrade-tree { grid-template-columns: 1fr; }
+  .game-title { font-size: 7px; }
+  .tab-btn    { font-size: 7px; padding: 8px 8px; }
+  .tab-content { padding: 8px; }
+  .plot       { width: 60px; height: 60px; }
+  .plot-emoji { font-size: 22px; }
+  .plot-label { font-size: 5px; }
+  .recipe-grid     { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+  .inventory-grid  { grid-template-columns: 1fr 1fr; }
+  .upgrade-tree    { grid-template-columns: 1fr 1fr; }
+  .water-can-bar   { flex-wrap: wrap; }
+  .ing-row         { flex-wrap: wrap; gap: 4px; }
+  .sell-btns       { flex-direction: column; gap: 4px; }
+  .coin-display    { font-size: 10px; padding: 3px 7px; }
+  .stats-section   { padding: 8px; }
+}
+
+@media (max-width: 380px) {
+  .upgrade-tree   { grid-template-columns: 1fr; }
+  .game-title     { font-size: 6px; }
+  .plot           { width: 52px; height: 52px; }
 }

@@ -1,5 +1,5 @@
 import { state } from './main.js';
-import { TREE_TIERS, PRODUCTS, INGREDIENTS, UPGRADES } from './data.js';
+import { TREE_TIERS, PRODUCTS, INGREDIENTS, UPGRADES, MILESTONES } from './data.js';
 import { plantPlot, waterPlot, harvestPlot } from './farm.js';
 import { queueRecipe, buyIngredient } from './recipes.js';
 import { sellProduct, sellAll, sellRawMangos, getEffectivePrice, getRawMangoPrice } from './market.js';
@@ -77,9 +77,17 @@ function _setupKitchenEvents() {
 
 // ── Farm ────────────────────────────────────────────────────
 export function renderFarm() {
+  _applyCosmetics();
   _renderTierSelector();
   _renderFarmGrid();
   _renderWaterCan();
+}
+
+function _applyCosmetics() {
+  const farm = document.getElementById('tab-farm');
+  ['flowers', 'signs', 'path', 'fountain'].forEach(key =>
+    farm.classList.toggle(`has-${key}`, state.cosmetics.includes(key))
+  );
 }
 
 function _renderTierSelector() {
@@ -429,8 +437,63 @@ function _showSparkle(anchorEl) {
   }
 }
 
-// ── Stub (step 6) ────────────────────────────────────────────
-export function renderStats() {}
+// ── Stats ────────────────────────────────────────────────────
+export function renderStats() {
+  const panel = document.getElementById('stats-panel');
+
+  // Favourite product
+  const crafted      = state.stats.productsCrafted ?? {};
+  const favId        = Object.keys(crafted).sort((a, b) => crafted[b] - crafted[a])[0];
+  const favProduct   = favId ? PRODUCTS.find(p => p.id === favId) : null;
+  const favLine      = favProduct
+    ? `${favProduct.emoji} ${favProduct.name} (${crafted[favId]} crafted)`
+    : '—';
+
+  // Playtime
+  const secs  = Math.floor(state.stats.playtime ?? 0);
+  const h     = Math.floor(secs / 3600);
+  const m     = Math.floor((secs % 3600) / 60);
+  const s     = secs % 60;
+  const timeStr = h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`;
+
+  // Summary rows
+  const summary = [
+    ['🥭 Mangos Harvested', (state.stats.mangosHarvested ?? 0).toLocaleString()],
+    ['🪙 Coins Earned',     (state.stats.coinsEarned ?? 0).toLocaleString() + 'g'],
+    ['⏱ Play Time',         timeStr],
+    ['⭐ Favourite',         favLine],
+  ];
+
+  // Products crafted (non-zero only)
+  const craftedRows = PRODUCTS
+    .filter(p => (crafted[p.id] ?? 0) > 0)
+    .map(p => `<div class="stat-row">
+      <span>${p.emoji} ${p.name}</span><span>${crafted[p.id]}</span>
+    </div>`)
+    .join('');
+
+  // Milestones
+  const milestoneRows = MILESTONES.map(m => {
+    const earned = state.stats.milestones.includes(m.id);
+    return `<div class="milestone${earned ? '' : ' locked-milestone'}">
+      ${earned ? '✓' : '○'} ${m.label}
+    </div>`;
+  }).join('');
+
+  panel.innerHTML = `
+    <div class="stats-section">
+      ${summary.map(([k, v]) => `<div class="stat-row"><span>${k}</span><span>${v}</span></div>`).join('')}
+    </div>
+    ${craftedRows ? `<div class="stats-section">
+      <div class="stats-subhead">Products Crafted</div>
+      ${craftedRows}
+    </div>` : ''}
+    <div class="stats-section">
+      <div class="stats-subhead">Milestones</div>
+      <div class="milestones">${milestoneRows}</div>
+    </div>
+  `;
+}
 
 // ── Shared utils ────────────────────────────────────────────
 export function updateCoinDisplay() {

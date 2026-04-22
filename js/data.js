@@ -460,4 +460,23 @@ export const DEFAULT_STATE = {
     milestones: [],
   },
   lastSaveTime: 0,
+  goldenMangoUnlocked: false,
+  marketEventNotifyFired: false,
 };
+
+// ── Milestones ───────────────────────────────────────────────
+export const MILESTONES = [
+  { id: 'first_harvest',    label: '🌟 First Harvest!',      check: s => s.stats.mangosHarvested >= 1 },
+  { id: 'mango_ten',        label: '🥭 Mango Collector!',    check: s => s.stats.mangosHarvested >= 10 },
+  { id: 'mango_hundred',    label: '🥭 Century Harvest!',    check: s => s.stats.mangosHarvested >= 100 },
+  { id: 'first_sale',       label: '💰 First Sale!',         check: s => s.stats.coinsEarned >= 1 },
+  { id: 'big_spender',      label: '💸 Big Spender!',        check: s => s.stats.coinsEarned >= 1000 },
+  { id: 'mango_mogul',      label: '🤑 Mango Mogul!',        check: s => s.stats.coinsEarned >= 10000 },
+  { id: 'salsa_master',     label: '🫙 Salsa Master!',       check: s => (s.stats.productsCrafted.mango_salsa ?? 0) >= 10 },
+  { id: 'juice_bar',        label: '🧃 Juice Bar!',          check: s => (s.stats.productsCrafted.mango_juice ?? 0) >= 10 },
+  { id: 'kitchen_explorer', label: '👨‍🍳 Kitchen Explorer!',  check: s => Object.values(s.stats.productsCrafted).filter(v => v > 0).length >= 3 },
+  { id: 'kitchen_pro',      label: '⭐ Kitchen Pro!',        check: s => Object.values(s.stats.productsCrafted).filter(v => v > 0).length >= 6 },
+  { id: 'ancient_grove',    label: '🌲 Ancient Grove!',      check: s => s.unlockedTiers.includes(4) },
+  { id: 'full_farm',        label: '🌳 Full Farm!',          check: s => s.farmCols >= 5 && s.farmRows >= 5 },
+  { id: 'golden_discovery', label: '✨ Golden Discovery!',   check: s => !!s.goldenMangoUnlocked },
+];

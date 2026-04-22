@@ -12,6 +12,8 @@ export function initMarket() {
 
 export function tickMarket(dt) {
   // Demand fluctuation
+  const events = [];
+
   state.demandUpdateTimer = (state.demandUpdateTimer ?? 0) + dt;
   if (state.demandUpdateTimer >= MARKET.demandUpdateInterval) {
     state.demandUpdateTimer -= MARKET.demandUpdateInterval;
@@ -21,16 +23,31 @@ export function tickMarket(dt) {
   // Market events
   if (state.marketEventActive) {
     if (Date.now() > state.marketEventEnds) {
-      state.marketEventActive  = false;
-      state.marketEventProduct = null;
+      state.marketEventActive        = false;
+      state.marketEventProduct       = null;
+      state.marketEventNotifyFired   = false;
     }
   } else {
     state.marketEventTimer = (state.marketEventTimer ?? 0) + dt;
+
+    // 30-second early warning (requires event_notify upgrade)
+    if (state.marketEventNotify && !state.marketEventNotifyFired) {
+      const remaining = MARKET.eventInterval - state.marketEventTimer;
+      if (remaining <= 30) {
+        state.marketEventNotifyFired = true;
+        events.push({ type: 'event_warn' });
+      }
+    }
+
     if (state.marketEventTimer >= MARKET.eventInterval) {
       state.marketEventTimer -= MARKET.eventInterval;
       _triggerEvent();
+      const p = PRODUCTS.find(q => q.id === state.marketEventProduct);
+      events.push({ type: 'event_start', productName: p?.name ?? '' });
     }
   }
+
+  return events;
 }
 
 function _rotateDemand() {
