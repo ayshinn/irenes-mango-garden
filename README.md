@@ -8,7 +8,7 @@ A browser-based active farming game. Plant mango trees, harvest fruit, craft del
 
 ## How to Play
 
-1. **Farm tab** — click an empty plot to plant (5g). Click a planted plot to water it (2× growth). Click 🥭 when ready to harvest.
+1. **Farm tab** — click an empty plot to plant (3g for Seedling). Click a planted plot to water it (2× growth). Click 🥭 when ready to harvest.
 2. **Kitchen tab** — click a recipe to craft products. Buy ingredients from the shop below.
 3. **Market tab** — sell products. Prices fluctuate every 60s. Watch for 2× market events every 5 min!
 4. **Upgrades tab** — expand your farm, unlock tree tiers, faster crafting, and more.

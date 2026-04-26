@@ -67,12 +67,12 @@ Each cycle takes real seconds (fast early game, scaled by upgrades).
 5. **Withered** — if not harvested in time (2× grow time), yield halved
 
 ### Mango Tree Tiers (unlock via upgrades)
-| Tier | Name | Grow Time | Yield | Unlock Cost |
-|------|------|-----------|-------|-------------|
-| 1 | Seedling | 30s | 1–2 mangos | start |
-| 2 | Young Tree | 25s | 2–3 mangos | 500g |
-| 3 | Mature Tree | 20s | 3–5 mangos | 2000g |
-| 4 | Ancient Tree | 15s | 5–8 mangos | 8000g |
+| Tier | Name | Grow Time | Yield | Seed Cost | Unlock Cost |
+|------|------|-----------|-------|-----------|-------------|
+| 1 | Seedling | 30s | 1–2 mangos | 3g | start |
+| 2 | Young Tree | 25s | 2–3 mangos | 6g | 500g |
+| 3 | Mature Tree | 20s | 3–5 mangos | 10g | 2000g |
+| 4 | Ancient Tree | 15s | 5–8 mangos | 15g | 8000g |
 
 ### Water Can
 - Starts with 3 charges, refills over time (1 charge / 20s)
@@ -142,10 +142,11 @@ Each cycle takes real seconds (fast early game, scaled by upgrades).
 
 ### Categories
 1. **Farm** — unlock plot rows/columns, tree tier upgrades, withering grace period
-2. **Water** — more water can charges, faster refill, auto-water (late game)
-3. **Kitchen** — extra craft queue slots (up to 8), faster craft times, auto-craft toggle
+2. **Water** — more water can charges (up to 10), faster refill (down to 5s); cheap early-game upgrades
+3. **Kitchen** — extra craft queue slots (up to 8), faster craft times
 4. **Market** — higher base prices (+10% per tier), demand event notifications
 5. **Garden Decor** — cosmetic unlocks (flowers, signs, paths) — no gameplay effect, purely cute
+6. **🤖 AI (Auto-Irene)** — all automation upgrades: Auto-Harvest, Auto-Water, Auto-Craft, Auto-Restock
 
 ### Upgrade Tree Structure
 - Linear per category with 3–5 tiers each
@@ -154,9 +155,12 @@ Each cycle takes real seconds (fast early game, scaled by upgrades).
 - Unlocking plays a pixel sparkle animation
 
 ### Notable Upgrades
-- **Auto-Harvest** (Farm tier 4): plots auto-harvest when ready
-- **Auto-Water** (Water tier 4): water can applies automatically
-- **Auto-Craft** (Kitchen tier 4): re-queues last recipe automatically
+- **Auto-Harvest** (AI section, requires Farm Expand II): plots auto-harvest when ready
+- **Auto-Water** (AI section, requires Bigger Can II): water applies automatically
+- **Auto-Craft** (AI section, requires Second Burner): re-queues last recipe automatically
+- **Auto-Restock** (AI section, requires Better Stall I): ingredients bought automatically
+- **Auto-Replant I–IX** (AI section, requires Auto-Harvest): 10%–90% chance plots replant after harvest using selected tier + seed cost. Costs 10k → 260k.
+- **🌳 Eternal Garden** (Auto-Replant IX → 100%, 340,000g): plots always self-replant. Unofficial final upgrade. Unlocks the "Eternal Garden" milestone. Combined with Auto-Harvest, Auto-Water, Auto-Craft, Auto-Restock creates a fully autonomous garden.
 - **Golden Mango** (secret): after selling 500 total mangos, rare golden mango appears — sells for 1000g
 
 ### Kitchen Burner Upgrades

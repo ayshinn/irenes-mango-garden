@@ -101,5 +101,11 @@ export function harvestPlot(index) {
   plot.progress = 0;
   plot.watered  = false;
   plot.readyAt  = null;
+
+  const replantChance = state.autoReplantChance ?? 0;
+  if (replantChance > 0 && Math.random() < replantChance) {
+    plantPlot(index);
+  }
+
   return { ok: true, yield: amount, wasWithered };
 }

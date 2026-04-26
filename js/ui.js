@@ -372,11 +372,12 @@ function _renderInventoryGrid() {
 
 // ── Upgrades ────────────────────────────────────────────────
 const CATEGORY_META = {
-  farm:    { label: '🌳 Farm',         order: 0 },
-  water:   { label: '💧 Water',        order: 1 },
-  kitchen: { label: '🍴 Kitchen',      order: 2 },
-  market:  { label: '🏪 Market',       order: 3 },
-  decor:   { label: '🌸 Garden Decor', order: 4 },
+  farm:    { label: '🌳 Farm',              order: 0 },
+  water:   { label: '💧 Water',             order: 1 },
+  kitchen: { label: '🍴 Kitchen',           order: 2 },
+  market:  { label: '🏪 Market',            order: 3 },
+  decor:   { label: '🌸 Garden Decor',      order: 4 },
+  auto:    { label: '🤖 AI (Auto-Irene)',   order: 5 },
 };
 
 function _setupUpgradeEvents() {

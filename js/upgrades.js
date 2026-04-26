@@ -82,6 +82,9 @@ function _apply(eff) {
     case 'auto_buy':
       state.autoBuy = true;
       break;
+    case 'auto_replant':
+      state.autoReplantChance = eff.value;
+      break;
     case 'cosmetic':
       if (!state.cosmetics.includes(eff.key)) state.cosmetics.push(eff.key);
       break;
