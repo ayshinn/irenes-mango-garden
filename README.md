@@ -17,7 +17,8 @@ A browser-based active farming game. Plant mango trees, harvest fruit, craft del
 ### Tips
 - Water your plants — 2× growth is a big deal early on.
 - Harvest before plots wither (idle 2× past grow time = yield halved).
-- Market events: one product 2× price for 30 seconds — stockpile for them.
+- Market events: one product 2× price for 30 seconds — a flashing banner with a countdown circle appears on every tab. Stockpile for them!
+- Cancel any in-progress craft with the × button on the craft slot — ingredients return to your inventory. Useful for breaking out of Auto-Craft loops.
 - Harvest 500 mangos total to unlock ✨ Golden Mango (worth 1000g each).
 
 ## Deploy to GitHub Pages

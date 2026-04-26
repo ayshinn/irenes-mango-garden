@@ -1,7 +1,7 @@
 import { state } from './main.js';
-import { TREE_TIERS, PRODUCTS, INGREDIENTS, UPGRADES, MILESTONES } from './data.js';
+import { TREE_TIERS, PRODUCTS, INGREDIENTS, UPGRADES, MILESTONES, MARKET } from './data.js';
 import { plantPlot, waterPlot, harvestPlot } from './farm.js';
-import { queueRecipe, buyIngredient } from './recipes.js';
+import { queueRecipe, buyIngredient, cancelCraft } from './recipes.js';
 import { sellProduct, sellAll, sellRawMangos, getEffectivePrice, getRawMangoPrice } from './market.js';
 import { purchaseUpgrade, isPurchased, isAvailable } from './upgrades.js';
 
@@ -67,6 +67,11 @@ function _setupKitchenEvents() {
   });
 
   document.getElementById('tab-kitchen').addEventListener('click', e => {
+    const cancelBtn = e.target.closest('.craft-cancel-btn');
+    if (cancelBtn) {
+      cancelCraft(parseInt(cancelBtn.dataset.cancelIndex));
+      return;
+    }
     const btn = e.target.closest('.ing-buy-btn');
     if (!btn) return;
     const r = buyIngredient(btn.dataset.ing, parseInt(btn.dataset.qty));
@@ -171,7 +176,7 @@ function _renderCraftQueue() {
     return;
   }
 
-  el.innerHTML = state.craftQueue.slice(0, slots).map(job => {
+  el.innerHTML = state.craftQueue.slice(0, slots).map((job, i) => {
     const product  = PRODUCTS.find(p => p.id === job.recipeId);
     if (!product) return '';
     const duration = product.craftTime * speed;
@@ -181,6 +186,7 @@ function _renderCraftQueue() {
       <span class="craft-name">${product.emoji} ${product.name}</span>
       <div class="craft-bar"><div class="craft-bar-fill" style="width:${pct.toFixed(1)}%"></div></div>
       <span class="craft-time">${remaining}s</span>
+      <button class="btn btn-small craft-cancel-btn" data-cancel-index="${i}" title="Cancel &amp; return ingredients">×</button>
     </div>`;
   }).join('') || '<span class="queue-empty">Kitchen is idle…</span>';
 }
@@ -285,6 +291,25 @@ function _renderMarketBanner() {
     banner.classList.remove('hidden');
   } else {
     banner.classList.add('hidden');
+  }
+}
+
+export function renderMarketEventBanner() {
+  const overlay = document.getElementById('market-event-overlay');
+  if (!overlay) return;
+
+  if (state.marketEventActive && state.marketEventProduct) {
+    const p         = PRODUCTS.find(q => q.id === state.marketEventProduct);
+    const remaining = Math.max(0, (state.marketEventEnds - Date.now()) / 1000);
+    const pct       = remaining / MARKET.eventDuration;
+    const dashOffset = (100 * (1 - pct)).toFixed(1);
+
+    overlay.querySelector('.event-overlay-text').textContent =
+      `🎉 ${p.emoji} ${p.name} 2×! ${Math.ceil(remaining)}s`;
+    overlay.querySelector('.timer-fill').style.strokeDashoffset = dashOffset;
+    overlay.classList.remove('hidden');
+  } else {
+    overlay.classList.add('hidden');
   }
 }
 
@@ -501,13 +526,14 @@ export function updateCoinDisplay() {
     Math.floor(state.coins).toLocaleString();
 }
 
-export function showToast(msg, type = 'info') {
+export function showToast(msg, type = 'info', duration = 3000) {
   const container = document.getElementById('toast-container');
   const el = document.createElement('div');
   el.className = `toast${type === 'coin' ? ' coin-toast' : ''}`;
   el.textContent = msg;
+  el.style.setProperty('--toast-out-delay', `${duration - 300}ms`);
   container.appendChild(el);
-  setTimeout(() => el.remove(), 3000);
+  setTimeout(() => el.remove(), duration);
 }
 
 export function showCoinToast(msg, anchorEl) {

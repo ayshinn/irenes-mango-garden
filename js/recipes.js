@@ -87,6 +87,30 @@ function _tryQueue(recipeId) {
   return { ok: true };
 }
 
+export function cancelCraft(index) {
+  const job = state.craftQueue[index];
+  if (!job) return { ok: false };
+
+  const product = PRODUCTS.find(p => p.id === job.recipeId);
+  if (product) {
+    state.inventory.mango = (state.inventory.mango ?? 0) + product.mangos;
+    for (const [ingId, qty] of Object.entries(product.ingredients)) {
+      if (INGREDIENTS[ingId].price === 0) continue;
+      state.ingredients[ingId] = (state.ingredients[ingId] ?? 0) + qty;
+    }
+  }
+
+  const recipeId = job.recipeId;
+  state.craftQueue.splice(index, 1);
+
+  // Clear auto-craft target if no more of this recipe remain, breaking potential loop
+  if (state.lastCraftRecipe === recipeId && !state.craftQueue.some(j => j.recipeId === recipeId)) {
+    state.lastCraftRecipe = null;
+  }
+
+  return { ok: true };
+}
+
 export function buyIngredient(ingId, qty = 1) {
   const ing = INGREDIENTS[ingId];
   if (!ing || ing.price === 0) return { ok: false, msg: 'Cannot buy' };

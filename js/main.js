@@ -6,7 +6,7 @@ import { initMarket, tickMarket } from './market.js';
 import { initUpgrades } from './upgrades.js';
 import {
   initUI, renderFarm, renderKitchen, renderMarket, renderUpgrades, renderStats,
-  updateCoinDisplay, showToast,
+  updateCoinDisplay, showToast, renderMarketEventBanner,
 } from './ui.js';
 
 export let state = {};
@@ -49,7 +49,7 @@ function _applyOfflineProgress() {
   if (elapsed < 5) return;
   tickFarm(elapsed);
   const mins = Math.floor(elapsed / 60);
-  if (mins > 0) showToast(`Welcome back! ${mins}m of farm growth applied.`, 'info');
+  if (mins > 0) showToast(`Welcome back! ${mins}m of farm growth applied.`, 'info', 8000);
 }
 
 function loop(ts) {
@@ -62,8 +62,7 @@ function loop(ts) {
   tickKitchen(dt);
   const mktEvents = tickMarket(dt);
   for (const ev of mktEvents) {
-    if (ev.type === 'event_warn')  showToast('📢 Market event in 30s! Stock up!', 'info');
-    if (ev.type === 'event_start') showToast(`🎉 Market event! ${ev.productName} is 2× price!`, 'success');
+    if (ev.type === 'event_warn') showToast('📢 Market event in 30s! Stock up!', 'info', 8000);
   }
 
   if (ts - lastMilestone > MILESTONE_INTERVAL) {
@@ -78,6 +77,7 @@ function loop(ts) {
     if (tab === 'market')   renderMarket();
     if (tab === 'upgrades') renderUpgrades();
     if (tab === 'stats')    renderStats();
+    renderMarketEventBanner();
     updateCoinDisplay();
     lastRender = ts;
   }
@@ -94,7 +94,7 @@ function _checkMilestones() {
   for (const m of MILESTONES) {
     if (!state.stats.milestones.includes(m.id) && m.check(state)) {
       state.stats.milestones.push(m.id);
-      showToast(m.label, 'success');
+      showToast(m.label, 'success', 8000);
     }
   }
 }

@@ -88,6 +88,8 @@ Each cycle takes real seconds (fast early game, scaled by upgrades).
 - Click recipe → queues craft (one queue slot by default, upgradeable)
 - Progress bar shows craft time
 - Finish → product goes to inventory
+- Each active craft slot has a **× cancel button** — removes from queue and returns all ingredients + mangos
+  - Canceling also clears `lastCraftRecipe` if no more of that recipe remain in queue, breaking Auto-Craft loops
 
 ### Products & Recipes
 
@@ -125,7 +127,10 @@ Each cycle takes real seconds (fast early game, scaled by upgrades).
 ### Dynamic Pricing
 - Base price per product (see table above)
 - Mild demand fluctuation: ±20% every 60s (visual indicator: arrow up/down)
-- "Market Event" popup every 5 min: one product 2× price for 30s (encourages stockpiling)
+- **Market Event** every 5 min: one product 2× price for 30s (encourages stockpiling)
+  - No toast on start; instead a **fixed flashing banner** appears on every tab below the top bar
+  - Banner shows product name + an SVG circle timer draining as time runs out
+  - Market Gossip upgrade fires an 8s toast warning 30s before the event
 
 ### Coin Display
 - Always visible top bar: 🪙 [amount]
@@ -138,7 +143,7 @@ Each cycle takes real seconds (fast early game, scaled by upgrades).
 ### Categories
 1. **Farm** — unlock plot rows/columns, tree tier upgrades, withering grace period
 2. **Water** — more water can charges, faster refill, auto-water (late game)
-3. **Kitchen** — extra craft queue slots, faster craft times, auto-craft toggle
+3. **Kitchen** — extra craft queue slots (up to 8), faster craft times, auto-craft toggle
 4. **Market** — higher base prices (+10% per tier), demand event notifications
 5. **Garden Decor** — cosmetic unlocks (flowers, signs, paths) — no gameplay effect, purely cute
 
@@ -153,6 +158,17 @@ Each cycle takes real seconds (fast early game, scaled by upgrades).
 - **Auto-Water** (Water tier 4): water can applies automatically
 - **Auto-Craft** (Kitchen tier 4): re-queues last recipe automatically
 - **Golden Mango** (secret): after selling 500 total mangos, rare golden mango appears — sells for 1000g
+
+### Kitchen Burner Upgrades
+| Upgrade | Slots | Cost |
+|---------|-------|------|
+| Second Burner | 2 | 700g |
+| Third Burner | 3 | 2,500g |
+| Fourth Burner | 4 | 6,000g |
+| Fifth Burner | 5 | 12,000g |
+| Sixth Burner | 6 | 22,000g |
+| Seventh Burner | 7 | 36,000g |
+| Eighth Burner | 8 | 55,000g |
 
 ---
 
@@ -190,6 +206,11 @@ Each cycle takes real seconds (fast early game, scaled by upgrades).
   - Kitchen craft bar fills with juice-like animation
   - Tab transitions: quick fade
   - Bounce on button hover
+- **Toasts** (`showToast(msg, type, duration)`):
+  - Default: 3s
+  - Welcome back, market gossip (event_warn), milestones: **8s**
+  - Market event start: no toast — replaced by persistent fixed banner
+- **Market event banner**: fixed position below top bar, visible on all tabs; SVG circle timer drains over event duration; pulses with mango/gold flash
 - **Background:** tiled pixel grass pattern (CSS)
 - **UI panels:** rounded pixel-border style (box-shadow pixel staircase trick)
 

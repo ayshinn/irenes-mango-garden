@@ -434,7 +434,7 @@ html, body {
   padding: 8px 14px;
   border: var(--px) solid var(--mango);
   box-shadow: var(--px) var(--px) 0 var(--mango);
-  animation: toastIn 0.2s ease, toastOut 0.3s ease 2.5s forwards;
+  animation: toastIn 0.2s ease, toastOut 0.3s ease var(--toast-out-delay, 2.7s) forwards;
 }
 
 .toast.coin-toast {
@@ -497,6 +497,61 @@ html, body {
 .craft-name { flex: 1; font-size: 8px; }
 .craft-time { font-size: 8px; white-space: nowrap; }
 .queue-empty { font-size: 9px; color: var(--gray); }
+
+.craft-cancel-btn {
+  background: var(--red);
+  color: #fff;
+  padding: 3px 7px;
+  font-size: 11px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.craft-cancel-btn:hover { background: #c62828; }
+
+/* ── Market event fixed overlay ── */
+.market-event-overlay {
+  position: fixed;
+  top: 42px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--mango);
+  border: var(--px) solid var(--dark);
+  box-shadow: var(--px) var(--px) 0 var(--dark);
+  padding: 5px 12px 5px 8px;
+  font-family: var(--font);
+  font-size: 9px;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: bannerPulse 0.8s ease-in-out infinite;
+}
+.market-event-overlay.hidden { display: none; }
+
+.event-overlay-text { color: var(--dark); }
+
+.event-timer-ring {
+  width: 26px;
+  height: 26px;
+  transform: rotate(-90deg);
+  flex-shrink: 0;
+}
+.timer-bg {
+  fill: none;
+  stroke: rgba(0,0,0,0.2);
+  stroke-width: 4;
+}
+.timer-fill {
+  fill: none;
+  stroke: var(--dark);
+  stroke-width: 4;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 0;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.3s linear;
+}
 
 /* ── Ingredient shop ── */
 .ingredient-shop { margin-top: 16px; }
