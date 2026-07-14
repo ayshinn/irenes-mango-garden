@@ -43,6 +43,8 @@ js/
   farm.js           plot grid, plant/water/harvest state machine
   recipes.js        crafting queue logic
   market.js         sell logic, price fluctuation, market events
+  sprites.js        pixel sprite engine: scene strips, actors, action triggers
+  sprites-data.js   sprite pixel data (Bora cast + scenes) as char grids
   upgrades.js       upgrade tree, apply effects to game state
   ui.js             render all tabs, toasts, animations
   save.js           localStorage save / load / reset

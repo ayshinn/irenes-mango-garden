@@ -4,6 +4,7 @@ import { plantPlot, waterPlot, harvestPlot } from './farm.js';
 import { queueRecipe, buyIngredient, cancelCraft } from './recipes.js';
 import { sellProduct, sellAll, sellRawMangos, getEffectivePrice, getRawMangoPrice } from './market.js';
 import { purchaseUpgrade, isPurchased, isAvailable } from './upgrades.js';
+import { gardenerAct, merchantSell } from './sprites.js';
 
 const TIER_EMOJI = ['🌱', '🌿', '🌳', '🌲'];
 
@@ -38,14 +39,18 @@ function _setupFarmEvents() {
     if (s === 'empty') {
       const r = plantPlot(i);
       if (!r.ok && r.msg) showToast(r.msg, 'error');
-      else updateCoinDisplay();
+      else { updateCoinDisplay(); gardenerAct('plant'); }
     } else if (s === 'planted') {
       const r = waterPlot(i);
       if (!r.ok && r.msg) showToast(r.msg, 'error');
+      else if (r.ok) gardenerAct('water');
     } else if (s === 'ready' || s === 'withered') {
       const r = harvestPlot(i);
-      if (r.ok) showToast(`+${r.yield} 🥭${r.wasWithered ? ' (withered)' : ''}`,
-        r.wasWithered ? 'warn' : 'success');
+      if (r.ok) {
+        showToast(`+${r.yield} 🥭${r.wasWithered ? ' (withered)' : ''}`,
+          r.wasWithered ? 'warn' : 'success');
+        gardenerAct('harvest');
+      }
     }
   });
 
@@ -262,6 +267,7 @@ function _setupMarketEvents() {
     if (result.ok && result.coins > 0) {
       updateCoinDisplay();
       showCoinToast(`+${result.coins}g`, btn);
+      merchantSell();
     }
   });
 }

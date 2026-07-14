@@ -8,6 +8,7 @@ import {
   initUI, renderFarm, renderKitchen, renderMarket, renderUpgrades, renderStats,
   updateCoinDisplay, showToast, renderMarketEventBanner,
 } from './ui.js';
+import { initSprites } from './sprites.js';
 
 export let state = {};
 
@@ -31,6 +32,7 @@ function init() {
 
   _applyOfflineProgress();
   initUI();
+  initSprites();
 
   updateCoinDisplay();
   renderFarm();

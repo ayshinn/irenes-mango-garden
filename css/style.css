@@ -702,3 +702,30 @@ html, body {
   .game-title     { font-size: 6px; }
   .plot           { width: 52px; height: 52px; }
 }
+
+/* ── Sprite Scene Strips ── */
+.scene-strip {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 14px;
+  max-width: 720px;
+  background: linear-gradient(to bottom, var(--sky) 0%, #b8e4f5 78%, transparent 78%);
+  border: var(--px) solid var(--dark);
+  box-shadow: inset calc(var(--px) * -1) calc(var(--px) * -1) 0 rgba(0,0,0,0.15);
+  overflow: hidden;
+}
+
+.scene-canvas {
+  image-rendering: pixelated;
+  width: 100%;
+  max-width: 704px;
+  height: auto;
+  display: block;
+}
+
+@media (max-width: 600px) {
+  .scene-strip { margin-bottom: 10px; }
+}
+
+.scene-kitchen { background: linear-gradient(to bottom, #fff3d6 0%, #ffe8b8 78%, transparent 78%); }
+.scene-market  { background: linear-gradient(to bottom, var(--cream) 0%, #ffe9c4 78%, transparent 78%); }
