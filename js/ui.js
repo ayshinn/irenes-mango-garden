@@ -1,10 +1,12 @@
 import { state } from './main.js';
 import { TREE_TIERS, PRODUCTS, INGREDIENTS, UPGRADES, MILESTONES, MARKET } from './data.js';
 import { plantPlot, waterPlot, harvestPlot } from './farm.js';
-import { queueRecipe, buyIngredient, cancelCraft } from './recipes.js';
+import { queueRecipe, buyIngredient, cancelCraft, tapStir, STIR_TAPS } from './recipes.js';
 import { sellProduct, sellAll, sellRawMangos, getEffectivePrice, getRawMangoPrice } from './market.js';
 import { purchaseUpgrade, isPurchased, isAvailable } from './upgrades.js';
-import { gardenerAct, merchantSell } from './sprites.js';
+import { fulfillOrder } from './orders.js';
+import { STICKER_GOAL } from './data.js';
+import { gardenerAct, merchantSell, react, orderCustomerResolve } from './sprites.js';
 
 const TIER_EMOJI = ['🌱', '🌿', '🌳', '🌲'];
 
@@ -49,7 +51,8 @@ function _setupFarmEvents() {
       if (r.ok) {
         showToast(`+${r.yield} 🥭${r.wasWithered ? ' (withered)' : ''}`,
           r.wasWithered ? 'warn' : 'success');
-        gardenerAct('harvest');
+        if (r.wasWithered) react('gardener', 'panic');
+        else gardenerAct('harvest');
       }
     }
   });
@@ -75,6 +78,22 @@ function _setupKitchenEvents() {
     const cancelBtn = e.target.closest('.craft-cancel-btn');
     if (cancelBtn) {
       cancelCraft(parseInt(cancelBtn.dataset.cancelIndex));
+      return;
+    }
+    const stirBtn = e.target.closest('.stir-btn');
+    if (stirBtn) {
+      const r = tapStir(parseInt(stirBtn.dataset.stirIndex));
+      if (r.done && r.success) {
+        showToast('⭐ Perfect stir! Double batch!', 'success');
+        react('chef', 'happy');
+        renderKitchen();
+      } else if (r.done) {
+        showToast('💨 Too slow… keep tapping next time!', 'warn');
+        renderKitchen();
+      } else if (r.ok) {
+        // update label in place — a full rerender would eat rapid taps
+        stirBtn.textContent = `🥄 ${r.taps}/${STIR_TAPS}`;
+      }
       return;
     }
     const btn = e.target.closest('.ing-buy-btn');
@@ -156,6 +175,16 @@ function _renderFarmGrid() {
 }
 
 function _renderWaterCan() {
+  const bar = document.querySelector('.water-can-bar');
+  let weather = bar.querySelector('.weather-indicator');
+  if (!weather) {
+    weather = document.createElement('span');
+    weather.className = 'weather-indicator';
+    bar.prepend(weather);
+  }
+  weather.textContent = state.weather === 'rainy' ? '🌧️' : '☀️';
+  weather.title = state.weather === 'rainy' ? 'Rain — plants water themselves!' : 'Sunny';
+
   document.getElementById('water-charges').textContent = state.waterCharges;
   document.getElementById('water-max').textContent     = state.waterMax;
   const refillRate = state.waterRefillRate ?? 20;
@@ -187,10 +216,22 @@ function _renderCraftQueue() {
     const duration = product.craftTime * speed;
     const pct      = duration === 0 ? 100 : Math.min(((job.elapsed ?? 0) / duration) * 100, 100);
     const remaining = Math.ceil(Math.max(0, duration - (job.elapsed ?? 0)));
+
+    let stir = '';
+    if (job.bonus) {
+      stir = '<span class="stir-done">⭐ ×2</span>';
+    } else if (job.miniDone || (job.miniUntil && Date.now() > job.miniUntil)) {
+      stir = '<span class="stir-done">💨</span>';
+    } else {
+      const label = job.miniUntil ? `🥄 ${job.taps ?? 0}/8` : '🥄 Stir!';
+      stir = `<button class="btn btn-small stir-btn" data-stir-index="${i}">${label}</button>`;
+    }
+
     return `<div class="craft-slot">
       <span class="craft-name">${product.emoji} ${product.name}</span>
       <div class="craft-bar"><div class="craft-bar-fill" style="width:${pct.toFixed(1)}%"></div></div>
       <span class="craft-time">${remaining}s</span>
+      ${stir}
       <button class="btn btn-small craft-cancel-btn" data-cancel-index="${i}" title="Cancel &amp; return ingredients">×</button>
     </div>`;
   }).join('') || '<span class="queue-empty">Kitchen is idle…</span>';
@@ -251,6 +292,20 @@ function _renderIngShop() {
 // ── Market ──────────────────────────────────────────────────
 function _setupMarketEvents() {
   document.getElementById('tab-market').addEventListener('click', e => {
+    const fulfillBtn = e.target.closest('.order-fulfill-btn');
+    if (fulfillBtn && !fulfillBtn.disabled) {
+      const r = fulfillOrder();
+      if (r.ok) {
+        updateCoinDisplay();
+        showCoinToast(`+${r.coins}g`, fulfillBtn);
+        showToast('📋 Order complete! Customer is happy!', 'success');
+        orderCustomerResolve(true);
+        renderMarket();
+      } else if (r.msg) {
+        showToast(r.msg, 'error');
+      }
+      return;
+    }
     const btn = e.target.closest('[data-sell]');
     if (!btn || btn.disabled) return;
     const productId = btn.dataset.sell;
@@ -285,7 +340,37 @@ function _sellGoldenMango(qty) {
 
 export function renderMarket() {
   _renderMarketBanner();
+  _renderOrderPanel();
   _renderInventoryGrid();
+}
+
+function _renderOrderPanel() {
+  const tab = document.getElementById('tab-market');
+  let panel = tab.querySelector('.order-panel');
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.className = 'order-panel panel-card';
+    document.getElementById('inventory-grid').before(panel);
+  }
+
+  const order = state.order;
+  if (!order) {
+    panel.innerHTML = '<span class="order-empty">📋 No customer orders right now…</span>';
+    return;
+  }
+
+  const p         = PRODUCTS.find(q => q.id === order.productId);
+  const have      = state.inventory[order.productId] ?? 0;
+  const remaining = Math.ceil(Math.max(0, (order.expiresAt - Date.now()) / 1000));
+  const can       = have >= order.qty;
+
+  panel.innerHTML = `
+    <span class="order-title">📋 Customer Order</span>
+    <span class="order-body">${order.qty}× ${p.emoji} ${p.name}
+      <small>(have ${have})</small> → 🪙 ${order.reward}g</span>
+    <span class="order-timer">⏳ ${remaining}s</span>
+    <button class="btn btn-small ${can ? 'btn-green' : ''} order-fulfill-btn" ${can ? '' : 'disabled'}>
+      Deliver!</button>`;
 }
 
 function _renderMarketBanner() {
@@ -512,9 +597,25 @@ export function renderStats() {
     </div>`;
   }).join('');
 
+  // Sticker book: craft STICKER_GOAL of a product to earn its sticker
+  const stickers = state.stats.stickers ?? [];
+  const stickerCards = PRODUCTS.filter(p => p.craftTime > 0 || p.id === 'fresh_mango').map(p => {
+    const got   = stickers.includes(p.id);
+    const count = Math.min(crafted[p.id] ?? 0, STICKER_GOAL);
+    return `<div class="sticker${got ? ' earned' : ''}" title="${p.name}">
+      <span class="sticker-emoji">${got ? p.emoji : '❓'}</span>
+      <span class="sticker-label">${got ? p.name : `${count}/${STICKER_GOAL}`}</span>
+    </div>`;
+  }).join('');
+
   panel.innerHTML = `
     <div class="stats-section">
       ${summary.map(([k, v]) => `<div class="stat-row"><span>${k}</span><span>${v}</span></div>`).join('')}
+      <div class="stat-row"><span>📋 Orders Completed</span><span>${state.stats.ordersCompleted ?? 0}</span></div>
+    </div>
+    <div class="stats-section">
+      <div class="stats-subhead">📖 Sticker Book <small>(craft ${STICKER_GOAL} to earn)</small></div>
+      <div class="sticker-grid">${stickerCards}</div>
     </div>
     ${craftedRows ? `<div class="stats-section">
       <div class="stats-subhead">Products Crafted</div>

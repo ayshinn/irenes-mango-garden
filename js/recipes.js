@@ -34,8 +34,37 @@ export function tickKitchen(dt) {
 }
 
 function _complete(job, product) {
-  state.inventory[product.id]             = (state.inventory[product.id] ?? 0) + 1;
-  state.stats.productsCrafted[product.id] = (state.stats.productsCrafted[product.id] ?? 0) + 1;
+  const qty = job.bonus ? 2 : 1;   // perfect stir = double batch
+  state.inventory[product.id]             = (state.inventory[product.id] ?? 0) + qty;
+  state.stats.productsCrafted[product.id] = (state.stats.productsCrafted[product.id] ?? 0) + qty;
+}
+
+// ── Stir minigame ───────────────────────────────────────────
+// Tap the Stir! button STIR_TAPS times within STIR_WINDOW ms → double batch.
+export const STIR_TAPS = 8;
+export const STIR_WINDOW = 3000;
+
+export function tapStir(index) {
+  const job = state.craftQueue[index];
+  if (!job || job.miniDone) return { ok: false };
+
+  const now = Date.now();
+  if (!job.miniUntil) {            // first tap starts the window
+    job.miniUntil = now + STIR_WINDOW;
+    job.taps = 0;
+  }
+  if (now > job.miniUntil) {       // window closed before enough taps
+    job.miniDone = true;
+    return { ok: true, done: true, success: false };
+  }
+
+  job.taps = (job.taps ?? 0) + 1;
+  if (job.taps >= STIR_TAPS) {
+    job.bonus = true;
+    job.miniDone = true;
+    return { ok: true, done: true, success: true };
+  }
+  return { ok: true, done: false, taps: job.taps };
 }
 
 export function queueRecipe(recipeId) {

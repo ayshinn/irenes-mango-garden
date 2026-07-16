@@ -729,3 +729,57 @@ html, body {
 
 .scene-kitchen { background: linear-gradient(to bottom, #fff3d6 0%, #ffe8b8 78%, transparent 78%); }
 .scene-market  { background: linear-gradient(to bottom, var(--cream) 0%, #ffe9c4 78%, transparent 78%); }
+
+/* ── Customer Orders ── */
+.order-panel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--cream);
+  border: var(--px) solid var(--dark);
+  padding: 10px 14px;
+  margin: 0 auto 14px;
+  max-width: 720px;
+}
+.order-title  { color: var(--mango-dk); }
+.order-body   { flex: 1; }
+.order-body small { color: var(--gray); }
+.order-timer  { color: var(--red); }
+.order-empty  { color: var(--gray); }
+
+/* ── Stir Minigame ── */
+.stir-btn  { background: var(--coin); animation: stir-pulse 0.6s infinite alternate; }
+.stir-done { font-size: 10px; }
+@keyframes stir-pulse { from { transform: scale(1); } to { transform: scale(1.08); } }
+@media (prefers-reduced-motion: reduce) { .stir-btn { animation: none; } }
+
+/* ── Sticker Book ── */
+.sticker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+.sticker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  background: rgba(0,0,0,0.08);
+  border: 2px dashed var(--gray);
+  filter: grayscale(1) opacity(0.7);
+}
+.sticker.earned {
+  background: var(--cream);
+  border: 2px solid var(--mango);
+  filter: none;
+  transform: rotate(-2deg);
+}
+.sticker.earned:nth-child(even) { transform: rotate(2deg); }
+.sticker-emoji { font-size: 22px; }
+.sticker-label { font-size: 6px; text-align: center; }
+
+/* ── Weather ── */
+.weather-indicator { font-size: 14px; margin-right: 6px; }

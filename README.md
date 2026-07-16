@@ -14,6 +14,12 @@ A browser-based active farming game. Plant mango trees, harvest fruit, craft del
 4. **Upgrades tab** — expand your farm, unlock tree tiers, faster crafting, and more.
 5. **Stats tab** — track progress and earn milestone badges.
 
+### New!
+- **Customer orders** — a customer walks up to the Market stall with a request. Deliver in time for a 1.5× payout!
+- **Stir minigame** — while something cooks, mash 🥄 **Stir!** 8 times fast for a double batch.
+- **Weather** — sometimes it rains 🌧️: plants water themselves for free.
+- **Sticker book** — craft 10 of a dish to earn its sticker (Stats tab).
+
 ### Tips
 - Water your plants — 2× growth is a big deal early on.
 - Harvest before plots wither (idle 2× past grow time = yield halved).

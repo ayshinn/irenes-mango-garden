@@ -556,6 +556,26 @@ export const MARKET = {
   eventMultiplier: 2,            // price multiplier during event
 };
 
+// ── Orders Config ────────────────────────────────────────────
+export const ORDERS = {
+  interval: 90,        // seconds between order spawns
+  duration: 150,       // seconds to fulfill
+  bonusMult: 1.5,      // payout vs normal price
+  minQty: 1,
+  maxQty: 3,
+};
+
+// ── Weather Config ───────────────────────────────────────────
+export const WEATHER = {
+  rainChanceInterval: 120,  // roll for rain every N seconds of sun
+  rainChance: 0.4,          // chance per roll
+  rainMin: 40,              // rain lasts 40-80s
+  rainMax: 80,
+};
+
+// ── Sticker Book ─────────────────────────────────────────────
+export const STICKER_GOAL = 10;  // craft N of a product to earn its sticker
+
 // ── Save Defaults ────────────────────────────────────────────
 export const DEFAULT_STATE = {
   coins: 50,
@@ -594,10 +614,17 @@ export const DEFAULT_STATE = {
     coinsEarned: 0,
     playtime: 0,
     milestones: [],
+    ordersCompleted: 0,
+    stickers: [],
   },
   lastSaveTime: 0,
   goldenMangoUnlocked: false,
   marketEventNotifyFired: false,
+  order: null,          // { productId, qty, expiresAt, reward }
+  orderTimer: 0,
+  weather: 'sunny',     // 'sunny' | 'rainy'
+  weatherEnds: 0,       // timestamp rain stops
+  weatherTimer: 0,      // seconds of sun since last rain roll
 };
 
 // ── Milestones ───────────────────────────────────────────────

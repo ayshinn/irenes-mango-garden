@@ -1,5 +1,6 @@
 import { save, load, reset } from './save.js';
-import { DEFAULT_STATE, MILESTONES } from './data.js';
+import { DEFAULT_STATE, MILESTONES, PRODUCTS, STICKER_GOAL } from './data.js';
+import { initOrders, tickOrders, tickWeather } from './orders.js';
 import { initFarm, tickFarm } from './farm.js';
 import { initKitchen, tickKitchen } from './recipes.js';
 import { initMarket, tickMarket } from './market.js';
@@ -8,7 +9,7 @@ import {
   initUI, renderFarm, renderKitchen, renderMarket, renderUpgrades, renderStats,
   updateCoinDisplay, showToast, renderMarketEventBanner,
 } from './ui.js';
-import { initSprites } from './sprites.js';
+import { initSprites, orderCustomerResolve } from './sprites.js';
 
 export let state = {};
 
@@ -29,6 +30,7 @@ function init() {
   initKitchen();
   initMarket();
   initUpgrades();
+  initOrders();
 
   _applyOfflineProgress();
   initUI();
@@ -66,6 +68,21 @@ function loop(ts) {
   for (const ev of mktEvents) {
     if (ev.type === 'event_warn') showToast('📢 Market event in 30s! Stock up!', 'info', 8000);
   }
+  for (const ev of tickOrders(dt)) {
+    if (ev.type === 'order_new') {
+      const p = PRODUCTS.find(q => q.id === ev.order.productId);
+      showToast(`📋 New order: ${ev.order.qty}× ${p.emoji} ${p.name}!`, 'info', 8000);
+    }
+    if (ev.type === 'order_expired') {
+      showToast('📋 Order expired…', 'warn');
+      orderCustomerResolve(false);
+    }
+  }
+  for (const ev of tickWeather(dt)) {
+    showToast(ev.weather === 'rainy'
+      ? '🌧️ Rain! Plants water themselves.'
+      : '☀️ Sun is back!', 'info', 6000);
+  }
 
   if (ts - lastMilestone > MILESTONE_INTERVAL) {
     _checkMilestones();
@@ -99,9 +116,17 @@ function _checkMilestones() {
       showToast(m.label, 'success', 8000);
     }
   }
+  for (const p of PRODUCTS) {
+    if ((state.stats.productsCrafted[p.id] ?? 0) >= STICKER_GOAL
+        && !state.stats.stickers.includes(p.id)) {
+      state.stats.stickers.push(p.id);
+      showToast(`📖 New sticker: ${p.emoji} ${p.name}!`, 'success', 8000);
+    }
+  }
 }
 
 document.addEventListener('DOMContentLoaded', init);
+window.addEventListener('beforeunload', () => save(state));
 document.getElementById('new-game-btn')?.addEventListener('click', () => {
   if (confirm('Start a new game? All progress will be lost.')) {
     reset();

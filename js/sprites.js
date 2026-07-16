@@ -31,13 +31,29 @@ class Actor {
     this.tick = 0;
   }
 
-  play(frames, ms, loops = 2) {
-    this.seq = { frames, ms, left: frames.length * loops };
+  play(frames, ms, loops = 2, bounce = false) {
+    this.seq = { frames, ms, left: frames.length * loops, bounce };
     this.acc = 0;
     this.tick = 0;
   }
 
+  walk(targetX, { thenGone = false, speed = 22 } = {}) {
+    this.walkTo = targetX;
+    this.walkSpeed = speed;         // px per second
+    this.gone = false;
+    this.despawnOnArrive = thenGone;
+  }
+
   step(dtMs) {
+    if (this.walkTo != null) {
+      const dir = Math.sign(this.walkTo - this.x);
+      this.x += dir * this.walkSpeed * (dtMs / 1000);
+      if ((dir > 0 && this.x >= this.walkTo) || (dir < 0 && this.x <= this.walkTo)) {
+        this.x = this.walkTo;
+        this.walkTo = null;
+        if (this.despawnOnArrive) this.gone = true;
+      }
+    }
     const ms = this.seq ? this.seq.ms : (this.loopFrames ? this.loopMs : this.idleMs);
     this.acc += dtMs;
     while (this.acc >= ms) {
@@ -48,14 +64,17 @@ class Actor {
   }
 
   draw(ctx) {
+    const x = Math.round(this.x);
     if (this.seq) {
-      drawSprite(ctx, this.sprite, this.seq.frames[this.tick % this.seq.frames.length], this.x, this.y);
+      const dy = this.seq.bounce ? this.tick % 2 : 0;
+      drawSprite(ctx, this.sprite, this.seq.frames[this.tick % this.seq.frames.length], x, this.y + dy);
     } else if (this.loopFrames) {
-      drawSprite(ctx, this.sprite, this.loopFrames[this.tick % this.loopFrames.length], this.x, this.y);
+      drawSprite(ctx, this.sprite, this.loopFrames[this.tick % this.loopFrames.length], x, this.y);
     } else {
-      // idle: frame 0 with a 1px bounce
-      drawSprite(ctx, this.sprite, 0, this.x, this.y + (this.tick % 2));
+      // idle (and walking): frame 0 with a 1px bounce
+      drawSprite(ctx, this.sprite, 0, x, this.y + (this.tick % 2));
     }
+    if (this.bubble) drawSprite(ctx, SPRITES.bubble, 0, x + 22, 0);
   }
 }
 
@@ -84,6 +103,7 @@ class Scene {
   step(dtMs) {
     if (this.onFrame) this.onFrame();
     for (const a of this.actors) a.step(dtMs);
+    this.actors = this.actors.filter(a => !a.gone);
   }
 
   draw() {
@@ -94,6 +114,7 @@ class Scene {
     ctx.fillStyle = this.ground[1];
     ctx.fillRect(0, SCENE_H - 1, SCENE_W, 1);
     for (const a of this.actors) a.draw(ctx);
+    if (this.overlay) this.overlay(ctx);
   }
 }
 
@@ -103,10 +124,31 @@ let gardeners = [];
 let chefs = [];
 let merchant = null;
 let chopBoard = null;
+let orderCustomer = null;
+let crowd = [];
 
 const GARDENER = { water: [1, 2], plant: [3, 4], harvest: [5, 6] };
 const CHEF_STIR = [1, 2];
 const MERCHANT_SELL = [1, 2];
+
+// happy/panic reaction frame per role (see sprites-data.js frame index table)
+const REACT = {
+  gardener: { happy: 7, panic: 8 },
+  chef:     { happy: 3, panic: 4 },
+  merchant: { happy: 3, panic: 4 },
+};
+
+// customer dress color variants (palette-swapped on spawn)
+const DRESS_COLORS = [
+  ['#e58bb5', '#c96a96'],   // pink
+  ['#7ecbe8', '#5aa7c9'],   // blue
+  ['#9fd98a', '#7ab868'],   // green
+];
+
+function _customerSprite() {
+  const [d, D] = DRESS_COLORS[Math.floor(Math.random() * DRESS_COLORS.length)];
+  return { pal: { ...SPRITES.customer.pal, d, D }, frames: SPRITES.customer.frames };
+}
 
 // Which board scene plays for the recipe currently cooking (default: chop)
 const RECIPE_BOARD = {
@@ -148,6 +190,16 @@ export function initSprites() {
     const plots = (state.farmRows ?? 2) * (state.farmCols ?? 2);
     _syncCrew(scenes.farm, gardeners, SPRITES.gardener, plots >= 9 ? 3 : plots >= 6 ? 2 : 1);
   };
+  scenes.farm.overlay = (ctx) => {
+    if (state.weather !== 'rainy') return;
+    ctx.fillStyle = '#6db8e8';
+    const t = performance.now() / 1000;
+    for (let i = 0; i < 16; i++) {
+      const x = (i * 41 + Math.floor(t * 3) * 7) % SCENE_W;
+      const y = (i * 11 + Math.floor(t * 44)) % (SCENE_H - 2);
+      ctx.fillRect(x, y, 1, 2);
+    }
+  };
 
   // Kitchen: chef crew (one per craft slot, up to 3) + recipe board
   scenes.kitchen = new Scene(mounts.kitchen, ['#BCAAA4', '#8B5E3C']);
@@ -167,10 +219,31 @@ export function initSprites() {
     chopBoard.loopFrames = busy > 0 ? [0, 1, 2, 3] : [0];
   };
 
-  // Market: stall backdrop + merchant beside it
+  // Market: stall backdrop + merchant + customers
   scenes.market = new Scene(mounts.market, ['#D7B98E', '#8B5E3C']);
   scenes.market.add(new Actor(SPRITES.stall, 96, 6, { loopFrames: [0, 1], loopMs: 900 }));
   merchant = scenes.market.add(new Actor(SPRITES.merchant, 56, 4));
+  scenes.market.onFrame = () => {
+    // customer walks in whenever an order is waiting (covers restored saves too)
+    if (state.order && !orderCustomer) {
+      orderCustomer = scenes.market.add(new Actor(_customerSprite(), -24, 4));
+      orderCustomer.walk(18);
+    }
+    if (orderCustomer) orderCustomer.bubble = !!state.order && orderCustomer.walkTo == null;
+
+    // market event: a little crowd rushes in; leaves when it ends
+    if (state.marketEventActive && !crowd.length) {
+      crowd = [132, 154].map(x => {
+        const c = scenes.market.add(new Actor(_customerSprite(), SCENE_W + 24, 4));
+        c.walk(x, { speed: 30 });
+        return c;
+      });
+      if (!merchant.seq) merchant.play([REACT.merchant.happy], 350, 4, true);
+    } else if (!state.marketEventActive && crowd.length) {
+      for (const c of crowd) c.walk(SCENE_W + 26, { thenGone: true, speed: 30 });
+      crowd = [];
+    }
+  };
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!reduced) requestAnimationFrame(_loop);
@@ -207,4 +280,26 @@ export function gardenerAct(action) {
 
 export function merchantSell() {
   merchant?.play(MERCHANT_SELL, 300, 3);
+}
+
+// Play a happy/panic face on a role's crew (first free member)
+export function react(role, mood) {
+  const frame = REACT[role]?.[mood];
+  if (frame == null) return;
+  const pool = role === 'gardener' ? gardeners : role === 'chef' ? chefs : [merchant];
+  const a = pool.find(m => m && !m.seq) ?? pool[0];
+  a?.play([frame], 350, 4, true);
+}
+
+// Order customer reacts and leaves (success → happy hop first)
+export function orderCustomerResolve(success) {
+  const c = orderCustomer;
+  orderCustomer = null;
+  if (!c) return;
+  c.bubble = false;
+  if (success) {
+    c.play([1], 300, 4, true);   // happy frame
+    react('merchant', 'happy');
+  }
+  setTimeout(() => c.walk(-26, { thenGone: true }), success ? 1200 : 0);
 }
